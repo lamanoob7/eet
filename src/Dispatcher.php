@@ -119,32 +119,32 @@ class Dispatcher {
      * @return array
      */
     public function getCheckCodes(Receipt $receipt) {
-        $objKey = new \XMLSecurityKey(\XMLSecurityKey::RSA_SHA256, ['type' => 'private']);
+        $objKey = new \XMLSecurityKey(\XMLSecurityKey::RSA_SHA256, array('type' => 'private'));
         $objKey->loadKey($this->key, TRUE);
 
-        $arr = [
+        $arr = array(
             $receipt->dic_popl,
             $receipt->id_provoz,
             $receipt->id_pokl,
             $receipt->porad_cis,
             $receipt->dat_trzby->format('c'),
             Format::price($receipt->celk_trzba)
-        ];
+        );
         $sign = $objKey->signData(join('|', $arr));
 
-        return [
-            'pkp' => [
+        return array(
+            'pkp' => array(
                 '_' => $sign,
                 'digest' => 'SHA256',
                 'cipher' => 'RSA2048',
                 'encoding' => 'base64'
-            ],
-            'bkp' => [
+            ),
+            'bkp' => array(
                 '_' => Format::BKB(sha1($sign)),
                 'digest' => 'SHA1',
                 'encoding' => 'base16'
-            ]
-        ];
+            )
+        );
     }
 
     /**
@@ -200,36 +200,52 @@ class Dispatcher {
      * @return object
      */
     private function processData(Receipt $receipt, $check = FALSE) {
-        $head = [
+        $head = array(
             'uuid_zpravy' => $receipt->uuid_zpravy,
             'dat_odesl' => time(),
             'prvni_zaslani' => $receipt->prvni_zaslani,
             'overeni' => $check
-        ];
+        );
 
-        $body = [
+        $body = array(
             'dic_popl' => $receipt->dic_popl,
-            'dic_poverujiciho' => $receipt->dic_poverujiciho,
             'id_provoz' => $receipt->id_provoz,
             'id_pokl' => $receipt->id_pokl,
             'porad_cis' => $receipt->porad_cis,
             'dat_trzby' => $receipt->dat_trzby->format('c'),
             'celk_trzba' => Format::price($receipt->celk_trzba),
-            'zakl_nepodl_dph' => Format::price($receipt->zakl_nepodl_dph),
-            'zakl_dan1' => Format::price($receipt->zakl_dan1),
-            'dan1' => Format::price($receipt->dan1),
-            'zakl_dan2' => Format::price($receipt->zakl_dan2),
-            'dan2' => Format::price($receipt->dan2),
-            'zakl_dan3' => Format::price($receipt->zakl_dan3),
-            'dan3' => Format::price($receipt->dan3),
             'rezim' => $receipt->rezim
-        ];
+        );
+        if($receipt->dic_poverujiciho){
+            $body['dic_poverujiciho'] = Format::price($receipt->dic_poverujiciho);
+        }
+        if($receipt->zakl_nepodl_dph){
+            $body['zakl_nepodl_dph'] = Format::price($receipt->zakl_nepodl_dph);
+        }
+        if($receipt->zakl_dan1){
+            $body['zakl_dan1'] = Format::price($receipt->zakl_dan1);
+        }
+        if($receipt->dan1){
+            $body['dan1'] = Format::price($receipt->dan1);
+        }
+        if($receipt->zakl_dan2){
+            $body['zakl_dan2'] = Format::price($receipt->zakl_dan2);
+        }
+        if($receipt->dan2){
+            $body['dan2'] = Format::price($receipt->dan2);
+        }
+        if($receipt->zakl_dan3){
+            $body['zakl_dan3'] = Format::price($receipt->zakl_dan3);
+        }
+        if($receipt->dan3){
+            $body['dan3'] = Format::price($receipt->dan3);
+        }
 
-        return $this->getSoapClient()->OdeslaniTrzby([
+        return $this->getSoapClient()->OdeslaniTrzby(array(
                     'Hlavicka' => $head,
                     'Data' => $body,
                     'KontrolniKody' => $this->getCheckCodes($receipt)
-                        ]
+            )
         );
     }
 
@@ -239,7 +255,7 @@ class Dispatcher {
      */
     private function processError($error) {
         if ($error->kod) {
-            $msgs = [
+            $msgs = array(
                 -1 => 'Docasna technicka chyba zpracovani – odeslete prosim datovou zpravu pozdeji',
                 2 => 'Kodovani XML neni platne',
                 3 => 'XML zprava nevyhovela kontrole XML schematu',
@@ -248,7 +264,7 @@ class Dispatcher {
                 6 => 'DIC poplatnika ma chybnou strukturu',
                 7 => 'Datova zprava je prilis velka',
                 8 => 'Datova zprava nebyla zpracovana kvuli technicke chybe nebo chybe dat',
-            ];
+            );
             $msg = isset($msgs[$error->kod]) ? $msgs[$error->kod] : '';
             throw new ServerException($msg, $error->kod);
         }

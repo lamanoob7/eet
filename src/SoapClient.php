@@ -34,10 +34,11 @@ class SoapClient extends \SoapClient {
      */
     public function __construct($service, $key, $cert, $trace = FALSE) {
         $this->connectionStartTime = microtime(TRUE);
-        parent::__construct($service, [
-            'exceptions' => TRUE,
-            'trace' => $trace
-        ]);
+        parent::__construct($service, array(
+                'exceptions' => TRUE,
+                'trace' => $trace
+            )
+        );
         $this->key = $key;
         $this->cert = $cert;
         $this->traceRequired = $trace;
@@ -50,9 +51,9 @@ class SoapClient extends \SoapClient {
         $objWSSE = new \WSSESoap($doc);
         $objWSSE->addTimestamp();
 
-        $objKey = new \XMLSecurityKey(\XMLSecurityKey::RSA_SHA256, ['type' => 'private']);
+        $objKey = new \XMLSecurityKey(\XMLSecurityKey::RSA_SHA256, array('type' => 'private'));
         $objKey->loadKey($this->key, TRUE);
-        $objWSSE->signSoapDoc($objKey, ["algorithm" => \XMLSecurityDSig::SHA256]);
+        $objWSSE->signSoapDoc($objKey, array("algorithm" => \XMLSecurityDSig::SHA256));
 
         $token = $objWSSE->addBinaryToken(file_get_contents($this->cert));
         $objWSSE->attachTokentoSig($token);

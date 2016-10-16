@@ -43,22 +43,22 @@ class Receipt {
     public $celk_trzba = 0;
 
     /** @var float */
-    public $zakl_nepodl_dph = 0;
+    public $zakl_nepodl_dph;
 
     /** @var float */
-    public $zakl_dan1 = 0;
+    public $zakl_dan1;
 
     /** @var float */
     public $dan1 = 0;
 
     /** @var float */
-    public $zakl_dan2 = 0;
+    public $zakl_dan2;
 
     /** @var float */
     public $dan2 = 0;
 
     /** @var float */
-    public $zakl_dan3 = 0;
+    public $zakl_dan3;
 
     /** @var float */
     public $dan3 = 0;

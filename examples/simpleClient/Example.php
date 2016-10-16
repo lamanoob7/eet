@@ -1,6 +1,7 @@
 <?php
 
-require_once __DIR__ . "/../bootstrap.php";
+$dir = dirname(__FILE__);
+require_once $dir . "/../bootstrap.php";
 
 use Ondrejnov\EET\Exceptions\ServerException;
 use Ondrejnov\EET\Dispatcher;

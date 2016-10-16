@@ -7,8 +7,8 @@ use Ondrejnov\EET\Exceptions\ClientException;
 use Ondrejnov\EET\Exceptions\ServerException;
 use Ondrejnov\EET\Receipt;
 use Tester\Assert;
-
-require_once __DIR__ . '/../bootstrap.php';
+$dir = dirname(__FILE__);
+require_once $dir . '/../bootstrap.php';
 
 class Dispatcher extends \Tester\TestCase {
 
