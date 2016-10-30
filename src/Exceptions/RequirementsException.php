@@ -1,7 +1,7 @@
 <?php
 
-namespace Ondrejnov\EET\Exceptions;
+//namespace Ondrejnov\EET\Exceptions;
 
-class RequirementsException extends \Exception {
+class Ondrejnov_EET_Exceptions_RequirementsException extends Exception {
     
 }

@@ -1,17 +1,17 @@
 <?php
 
-namespace Ondrejnov\EET;
+//namespace OndrejnovEET;
 
-use Ondrejnov\EET\Exceptions\ClientException;
-use Ondrejnov\EET\Exceptions\RequirementsException;
-use Ondrejnov\EET\Exceptions\ServerException;
-use Ondrejnov\EET\SoapClient;
-use Ondrejnov\EET\Utils\Format;
+//use Ondrejnov\EET\Exceptions\ClientException;
+//use Ondrejnov\EET\Exceptions\RequirementsException;
+//use Ondrejnov\EET\Exceptions\ServerException;
+//use Ondrejnov\EET\SoapClient;
+//use Ondrejnov\EET\Utils\Format;
 
 /**
  * Receipt for Ministry of Finance
  */
-class Dispatcher {
+class Ondrejnov_EET_Dispatcher {
 
     /**
      * Certificate key
@@ -38,7 +38,7 @@ class Dispatcher {
 
     /**
      *
-     * @var SoapClient
+     * @var Ondrejnov_EET_SoapClient
      */
     private $soapClient;
 
@@ -60,10 +60,10 @@ class Dispatcher {
      * @param Receipt $receipt
      * @return boolean|string
      */
-    public function check(Receipt $receipt) {
+    public function check(Ondrejnov_EET_Receipt $receipt) {
         try {
             return $this->send($receipt, TRUE);
-        } catch (ServerException $e) {
+        } catch (Ondrejnov_EET_Exceptions_ServerException $e) {
             return FALSE;
         }
     }
@@ -107,19 +107,19 @@ class Dispatcher {
 
     /**
      * 
-     * @throws ClientException
+     * @throws Ondrejnov_EET_Exceptions_ClientException
      */
     private function throwTraceNotEnabled() {
-        throw new ClientException('Trace is not enabled! Set trace property to TRUE.');
+        throw new Ondrejnov_EET_Exceptions_ClientException('Trace is not enabled! Set trace property to TRUE.');
     }
 
     /**
      * 
-     * @param \Ondrejnov\EET\Receipt $receipt
+     * @param Ondrejnov_EET_Receipt $receipt
      * @return array
      */
-    public function getCheckCodes(Receipt $receipt) {
-        $objKey = new \XMLSecurityKey(\XMLSecurityKey::RSA_SHA256, array('type' => 'private'));
+    public function getCheckCodes(Ondrejnov_EET_Receipt $receipt) {
+        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, array('type' => 'private'));
         $objKey->loadKey($this->key, TRUE);
 
         $arr = array(
@@ -128,9 +128,9 @@ class Dispatcher {
             $receipt->id_pokl,
             $receipt->porad_cis,
             $receipt->dat_trzby->format('c'),
-            Format::price($receipt->celk_trzba)
+            Ondrejnov_EET_Utils_Format::price($receipt->celk_trzba)
         );
-        $sign = $objKey->signData(join('|', $arr));
+        $sign = $objKey->signData(implode('|', $arr));
 
         return array(
             'pkp' => array(
@@ -140,7 +140,7 @@ class Dispatcher {
                 'encoding' => 'base64'
             ),
             'bkp' => array(
-                '_' => Format::BKB(sha1($sign)),
+                '_' => Ondrejnov_EET_Utils_Format::BKB(sha1($sign)),
                 'digest' => 'SHA1',
                 'encoding' => 'base16'
             )
@@ -153,7 +153,7 @@ class Dispatcher {
      * @param boolean $check
      * @return boolean|string
      */
-    public function send(Receipt $receipt, $check = FALSE) {
+    public function send(Ondrejnov_EET_Receipt $receipt, $check = FALSE) {
         $this->initSoapClient();
 
         $response = $this->processData($receipt, $check);
@@ -165,19 +165,19 @@ class Dispatcher {
 
     /**
      * 
-     * @throws RequirementsException
+     * @throws Ondrejnov_EET_Exceptions_RequirementsException
      * @return void
      */
     private function checkRequirements() {
-        if (!class_exists('\SoapClient')) {
-            throw new RequirementsException('Class SoapClient is not defined! Please, allow php extension php_soap.dll in php.ini');
+        if (!class_exists('SoapClient')) {
+            throw new Ondrejnov_EET_Exceptions_RequirementsException('Class SoapClient is not defined! Please, allow php extension php_soap.dll in php.ini');
         }
     }
 
     /**
      * Get (or if not exists: initialize and get) SOAP client.
      * 
-     * @return SoapClient
+     * @return Ondrejnov_EET_SoapClient
      */
     private function getSoapClient() {
         !isset($this->soapClient) && $this->initSoapClient();
@@ -190,7 +190,7 @@ class Dispatcher {
      * @return void
      */
     private function initSoapClient() {
-        $this->soapClient = new SoapClient($this->service, $this->key, $this->cert, $this->trace);
+        $this->soapClient = new Ondrejnov_EET_SoapClient($this->service, $this->key, $this->cert, $this->trace);
     }
 
     /**
@@ -199,7 +199,7 @@ class Dispatcher {
      * @param boolean $check
      * @return object
      */
-    private function processData(Receipt $receipt, $check = FALSE) {
+    private function processData(Ondrejnov_EET_Receipt $receipt, $check = FALSE) {
         $head = array(
             'uuid_zpravy' => $receipt->uuid_zpravy,
             'dat_odesl' => time(),
@@ -213,32 +213,32 @@ class Dispatcher {
             'id_pokl' => $receipt->id_pokl,
             'porad_cis' => $receipt->porad_cis,
             'dat_trzby' => $receipt->dat_trzby->format('c'),
-            'celk_trzba' => Format::price($receipt->celk_trzba),
+            'celk_trzba' => Ondrejnov_EET_Utils_Format::price($receipt->celk_trzba),
             'rezim' => $receipt->rezim
         );
         if($receipt->dic_poverujiciho){
-            $body['dic_poverujiciho'] = Format::price($receipt->dic_poverujiciho);
+            $body['dic_poverujiciho'] = Ondrejnov_EET_Utils_Format::price($receipt->dic_poverujiciho);
         }
         if($receipt->zakl_nepodl_dph){
-            $body['zakl_nepodl_dph'] = Format::price($receipt->zakl_nepodl_dph);
+            $body['zakl_nepodl_dph'] = Ondrejnov_EET_Utils_Format::price($receipt->zakl_nepodl_dph);
         }
         if($receipt->zakl_dan1){
-            $body['zakl_dan1'] = Format::price($receipt->zakl_dan1);
+            $body['zakl_dan1'] = Ondrejnov_EET_Utils_Format::price($receipt->zakl_dan1);
         }
         if($receipt->dan1){
-            $body['dan1'] = Format::price($receipt->dan1);
+            $body['dan1'] = Ondrejnov_EET_Utils_Format::price($receipt->dan1);
         }
         if($receipt->zakl_dan2){
-            $body['zakl_dan2'] = Format::price($receipt->zakl_dan2);
+            $body['zakl_dan2'] = Ondrejnov_EET_Utils_Format::price($receipt->zakl_dan2);
         }
         if($receipt->dan2){
-            $body['dan2'] = Format::price($receipt->dan2);
+            $body['dan2'] = Ondrejnov_EET_Utils_Format::price($receipt->dan2);
         }
         if($receipt->zakl_dan3){
-            $body['zakl_dan3'] = Format::price($receipt->zakl_dan3);
+            $body['zakl_dan3'] = Ondrejnov_EET_Utils_Format::price($receipt->zakl_dan3);
         }
         if($receipt->dan3){
-            $body['dan3'] = Format::price($receipt->dan3);
+            $body['dan3'] = Ondrejnov_EET_Utils_Format::price($receipt->dan3);
         }
 
         return $this->getSoapClient()->OdeslaniTrzby(array(
@@ -251,7 +251,7 @@ class Dispatcher {
 
     /**
      * @param $error
-     * @throws ServerException
+     * @throws Ondrejnov_EET_Exceptions_ServerException
      */
     private function processError($error) {
         if ($error->kod) {
@@ -266,7 +266,7 @@ class Dispatcher {
                 8 => 'Datova zprava nebyla zpracovana kvuli technicke chybe nebo chybe dat',
             );
             $msg = isset($msgs[$error->kod]) ? $msgs[$error->kod] : '';
-            throw new ServerException($msg, $error->kod);
+            throw new Ondrejnov_EET_Exceptions_ServerException($msg, $error->kod);
         }
     }
 

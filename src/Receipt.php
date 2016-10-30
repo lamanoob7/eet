@@ -1,15 +1,15 @@
 <?php
 
-namespace Ondrejnov\EET;
+//namespace Ondrejnov\EET;
 
-use Ondrejnov\EET\Exceptions\ServerException;
-use Ondrejnov\EET\SoapClient;
-use Ondrejnov\EET\Utils\Format;
+//use Ondrejnov\EET\Exceptions\ServerException;
+//use Ondrejnov\EET\SoapClient;
+//use Ondrejnov\EET\Utils\Format;
 
 /**
  * Receipt for Ministry of Finance
  */
-class Receipt {
+class Ondrejnov_EET_Receipt {
 
     /**
      * Head part: message identifier

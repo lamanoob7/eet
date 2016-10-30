@@ -1,7 +1,7 @@
 <?php
 
-namespace Ondrejnov\EET\Exceptions;
+//namespace Ondrejnov_EET_Exceptions;
 
-class ClientException extends \Exception {
+class Ondrejnov_EET_Exceptions_ClientException extends Exception {
     
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Ondrejnov\EET;
+//namespace Ondrejnov\EET;
 
-class SoapClient extends \SoapClient {
+class Ondrejnov_EET_SoapClient extends SoapClient {
 
     /** @var string */
     private $key;
@@ -45,15 +45,15 @@ class SoapClient extends \SoapClient {
     }
 
     public function __doRequest($request, $location, $saction, $version, $one_way = NULL) {
-        $doc = new \DOMDocument('1.0');
+        $doc = new DOMDocument('1.0');
         $doc->loadXML($request);
 
-        $objWSSE = new \WSSESoap($doc);
+        $objWSSE = new WSSESoap($doc);
         $objWSSE->addTimestamp();
 
-        $objKey = new \XMLSecurityKey(\XMLSecurityKey::RSA_SHA256, array('type' => 'private'));
+        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, array('type' => 'private'));
         $objKey->loadKey($this->key, TRUE);
-        $objWSSE->signSoapDoc($objKey, array("algorithm" => \XMLSecurityDSig::SHA256));
+        $objWSSE->signSoapDoc($objKey, array("algorithm" => XMLSecurityDSig::SHA256));
 
         $token = $objWSSE->addBinaryToken(file_get_contents($this->cert));
         $objWSSE->attachTokentoSig($token);
