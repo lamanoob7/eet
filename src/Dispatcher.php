@@ -42,6 +42,9 @@ class Ondrejnov_EET_Dispatcher {
      */
     private $soapClient;
 
+
+    protected $bkp;
+
     /**
      * 
      * @param string $key
@@ -132,6 +135,7 @@ class Ondrejnov_EET_Dispatcher {
         );
         $sign = $objKey->signData(implode('|', $arr));
 
+        $this->bkp = Ondrejnov_EET_Utils_Format::BKB(sha1($sign));
         return array(
             'pkp' => array(
                 '_' => $sign,
@@ -140,7 +144,7 @@ class Ondrejnov_EET_Dispatcher {
                 'encoding' => 'base64'
             ),
             'bkp' => array(
-                '_' => Ondrejnov_EET_Utils_Format::BKB(sha1($sign)),
+                '_' => $this->bkp,
                 'digest' => 'SHA1',
                 'encoding' => 'base16'
             )
@@ -270,4 +274,8 @@ class Ondrejnov_EET_Dispatcher {
         }
     }
 
+    public function getBkp()
+    {
+        return $this->bkp;
+    }
 }
