@@ -5,25 +5,25 @@
 class Ondrejnov_EET_SoapClient extends SoapClient {
 
     /** @var string */
-    private $key;
+    protected $key;
 
     /** @var string */
-    private $cert;
+    protected $cert;
 
     /** @var boolean */
-    private $traceRequired;
+    protected $traceRequired;
 
     /** @var float */
-    private $connectionStartTime;
+    protected $connectionStartTime;
 
     /** @var float */
-    private $lastResponseStartTime;
+    protected $lastResponseStartTime;
 
     /** @var float */
-    private $lastResponseEndTime;
+    protected $lastResponseEndTime;
 
     /** @var string */
-    private $lastRequest;
+    protected $lastRequest;
 
     /**
      * 
@@ -44,6 +44,18 @@ class Ondrejnov_EET_SoapClient extends SoapClient {
         $this->traceRequired = $trace;
     }
 
+    protected function getObjKey()
+    {
+        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, array('type' => 'private'));
+        $objKey->loadKey($this->key, TRUE);
+        return $objKey;
+    }
+
+    protected function getCertContent()
+    {
+        return file_get_contents($this->cert);
+    }
+
     public function __doRequest($request, $location, $saction, $version, $one_way = NULL) {
         $doc = new DOMDocument('1.0');
         $doc->loadXML($request);
@@ -51,16 +63,16 @@ class Ondrejnov_EET_SoapClient extends SoapClient {
         $objWSSE = new WSSESoap($doc);
         $objWSSE->addTimestamp();
 
-        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, array('type' => 'private'));
-        $objKey->loadKey($this->key, TRUE);
+        $objKey = $this->getObjKey();
         $objWSSE->signSoapDoc($objKey, array("algorithm" => XMLSecurityDSig::SHA256));
 
-        $token = $objWSSE->addBinaryToken(file_get_contents($this->cert));
+        $token = $objWSSE->addBinaryToken($this->getCertContent());
         $objWSSE->attachTokentoSig($token);
 
         $this->traceRequired && $this->lastResponseStartTime = microtime(TRUE);
 
-        $response = parent::__doRequest($this->lastRequest = $objWSSE->saveXML(), $location, $saction, $version);
+        $this->lastRequest = $objWSSE->saveXML();
+        $response = parent::__doRequest($this->lastRequest, $location, $saction, $version);
 
         $this->traceRequired && $this->lastResponseEndTime = microtime(TRUE);
 

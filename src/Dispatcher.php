@@ -40,7 +40,7 @@ class Ondrejnov_EET_Dispatcher {
      *
      * @var Ondrejnov_EET_SoapClient
      */
-    private $soapClient;
+    protected $soapClient;
 
 
     protected $bkp;
@@ -116,14 +116,22 @@ class Ondrejnov_EET_Dispatcher {
         throw new Ondrejnov_EET_Exceptions_ClientException('Trace is not enabled! Set trace property to TRUE.');
     }
 
+    protected function getXmlSecurityKey()
+    {
+        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, array('type' => 'private'));
+        $objKey->loadKey($this->key, TRUE);
+        return $objKey;
+    }
+
     /**
      * 
      * @param Ondrejnov_EET_Receipt $receipt
      * @return array
      */
     public function getCheckCodes(Ondrejnov_EET_Receipt $receipt) {
-        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, array('type' => 'private'));
-        $objKey->loadKey($this->key, TRUE);
+//        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, array('type' => 'private'));
+//        $objKey->loadKey($this->key, TRUE);
+        $objKey = $this->getXmlSecurityKey();
 
         $arr = array(
             $receipt->dic_popl,
@@ -193,7 +201,7 @@ class Ondrejnov_EET_Dispatcher {
      * 
      * @return void
      */
-    private function initSoapClient() {
+    protected function initSoapClient() {
         $this->soapClient = new Ondrejnov_EET_SoapClient($this->service, $this->key, $this->cert, $this->trace);
     }
 
