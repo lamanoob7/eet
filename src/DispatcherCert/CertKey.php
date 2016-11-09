@@ -20,12 +20,6 @@ class Lamanoob7_EET_DispatcherCert_CertKey implements Lamanoob7_EET_DispatcherCe
         $this->keyPath = $keyPath;
     }
 
-//    public function getDispatcher()
-//    {
-//        return new Ondrejnov_EET_Dispatcher($this->servicePath, $this->certPath, $this->keyPath);
-////        return new Ondrejnov_EET_Dispatcher(PLAYGROUND_WSDL, EET_CERT_TEST_KEY, EET_CERT_TEST_CERT);
-//    }
-
     public function getService()
     {
         return $this->servicePath;

@@ -6,13 +6,13 @@
  * Date: 06.11.2016
  * Time: 11:20
  */
-class Lamanoob7_EET_DispatcherCert_P12 implements Lamanoob7_EET_DispatcherCert_IBase
+class Lamanoob7_EET_DispatcherCert_P12WithCert implements Lamanoob7_EET_DispatcherCert_IBase
 {
     public $servicePath;
     public $cert;
     public $key;
 
-    public function __construct($servicePath, $p12Path, $password)
+    public function __construct($servicePath, $p12Path, $password, $cert)
     {
         $this->servicePath = $servicePath;
         if (!$certStore = file_get_contents($p12Path)) {
@@ -21,12 +21,12 @@ class Lamanoob7_EET_DispatcherCert_P12 implements Lamanoob7_EET_DispatcherCert_I
         }
 
         if (openssl_pkcs12_read($certStore, $certInfo, $password)) {
-            $this->cert = trim($certInfo['cert']);
-            $this->key = trim($certInfo['pkey']);
+            $this->key = $certInfo['pkey'];
         } else {
             echo "P12 Error: Unable to read the cert store.\n";
-//    exit;
+            exit;
         }
+        $this->cert = $cert;
     }
 
     public function getService()
@@ -54,6 +54,6 @@ class Lamanoob7_EET_DispatcherCert_P12 implements Lamanoob7_EET_DispatcherCert_I
 
     public function getIsCertFile()
     {
-        return false;
+        return true;
     }
 }
