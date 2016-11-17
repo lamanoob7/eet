@@ -44,6 +44,7 @@ class Ondrejnov_EET_Dispatcher {
 
 
     protected $bkp;
+    protected $fik;
 
     /**
      * 
@@ -172,7 +173,8 @@ class Ondrejnov_EET_Dispatcher {
 
         isset($response->Chyba) && $this->processError($response->Chyba);
 
-        return $check ? TRUE : $response->Potvrzeni->fik;
+        $this->fik = $check ? TRUE : $response->Potvrzeni->fik;
+        return $this->fik;
     }
 
     /**
@@ -285,5 +287,10 @@ class Ondrejnov_EET_Dispatcher {
     public function getBkp()
     {
         return $this->bkp;
+    }
+
+    public function getFik()
+    {
+        return $this->fik;
     }
 }
