@@ -44,7 +44,10 @@ class Ondrejnov_EET_Dispatcher {
 
 
     protected $bkp;
+    protected $pkp;
     protected $fik;
+    /** @var  Ondrejnov_EET_Receipt */
+    protected $lastReceipt;
 
     /**
      * 
@@ -61,7 +64,7 @@ class Ondrejnov_EET_Dispatcher {
     /**
      * 
      * @param string $service
-     * @param Receipt $receipt
+     * @param Ondrejnov_EET_Receipt $receipt
      * @return boolean|string
      */
     public function check(Ondrejnov_EET_Receipt $receipt) {
@@ -142,12 +145,12 @@ class Ondrejnov_EET_Dispatcher {
             $receipt->dat_trzby->format('c'),
             Ondrejnov_EET_Utils_Format::price($receipt->celk_trzba)
         );
-        $sign = $objKey->signData(implode('|', $arr));
 
-        $this->bkp = Ondrejnov_EET_Utils_Format::BKB(sha1($sign));
+        $this->pkp = $objKey->signData(implode('|', $arr));
+        $this->bkp = Ondrejnov_EET_Utils_Format::BKB(sha1($this->pkp));
         return array(
             'pkp' => array(
-                '_' => $sign,
+                '_' => $this->pkp,
                 'digest' => 'SHA256',
                 'cipher' => 'RSA2048',
                 'encoding' => 'base64'
@@ -214,6 +217,7 @@ class Ondrejnov_EET_Dispatcher {
      * @return object
      */
     private function processData(Ondrejnov_EET_Receipt $receipt, $check = FALSE) {
+        $this->lastReceipt = $receipt;
         $head = array(
             'uuid_zpravy' => $receipt->uuid_zpravy,
             'dat_odesl' => time(),
@@ -289,8 +293,18 @@ class Ondrejnov_EET_Dispatcher {
         return $this->bkp;
     }
 
+    public function getPkp()
+    {
+        return (string)$this->pkp;
+    }
+
     public function getFik()
     {
         return $this->fik;
+    }
+
+    public function getLastReceipt()
+    {
+        return $this->lastReceipt;
     }
 }
