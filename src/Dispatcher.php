@@ -293,8 +293,11 @@ class Ondrejnov_EET_Dispatcher {
         return $this->bkp;
     }
 
-    public function getPkp()
+    public function getPkp($encoded = false)
     {
+        if($encoded){
+            return base64_encode((string)$this->pkp);
+        }
         return (string)$this->pkp;
     }
 
